@@ -18,8 +18,6 @@ def make_batch(datas, category=None):
             data_batch = torch.cat([data_batch, temp], dim=0)
             i += 1
 
-    data_batch = data_batch.squeeze(dim=0)
-
     return data_batch
 
 
@@ -111,6 +109,27 @@ def calculate_iou(box1, box2):
     return iou
 
 
+def calculate_iou_batch(box1, box2):
+    # Inputs:
+    #    box: [b, [y1, x1, y2, x2]]
+
+    area1 = (box1[2] - box1[0]) * (box1[3] - box1[1])
+    area2 = (box2[2] - box2[0]) * (box2[3] - box2[1])
+
+    y1 = np.maximum(box1[0], box2[0])
+    x1 = np.maximum(box1[1], box2[1])
+    y2 = np.minimum(box1[2], box2[2])
+    x2 = np.minimum(box1[3], box2[3])
+
+    iou = 0
+    if y1 < y2 and x1 < x2:
+        inter = (y2 - y1) * (x2 - x1)
+        union = area1 + area2 - inter
+        iou = inter / union
+
+    return iou
+
+
 def mean_iou_segmentation(output, predict):
     a, b = (output[:, 1, :, :] > 0), (predict > 0)
 
@@ -148,7 +167,6 @@ def nms(boxes, probs, threshold):
             nms_list.append(t)
 
     return nms_list
-
 
 
 def nms_ground_truth(anchor_boxes, ground_truth, score, iou_threshold):

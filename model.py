@@ -6,10 +6,12 @@ import torchvision.datasets as dset
 import torchvision.models as models
 import matplotlib.pyplot as plt
 from PIL import Image
-
 from torchsummary import summary
 
-pretrained_model = torch.load('pretrained models/vgg_voc_1e-05lr_0.11354loss_0.98816acc.pth')
+
+from vgg import VGG
+
+pretrained_model = torch.load('pretrained models/vgg_voc_1e-05lr_0.04111loss_0.99534acc.pth')
 
 
 class FeatureExtractedVGG(nn.Module):
@@ -41,10 +43,7 @@ class FeatureExtractedVGG(nn.Module):
         cls = self.classifier(x)
         cls = self.softmax(cls)
 
-        reg = self.box_reg(x)
-        reg = self.sigmoid(reg)
+        bbox = self.box_reg(x)
+        bbox = self.sigmoid(bbox)
 
-        return cls, reg
-
-model = FeatureExtractedVGG()
-summary(model, (3, 224, 224))
+        return cls, bbox

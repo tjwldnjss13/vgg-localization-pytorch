@@ -73,16 +73,17 @@ class VOCDataset(data.Dataset):
             for obj in objs:
                 name = obj.find('name').text
                 bbox = obj.find('bndbox')
-                xmin = float(bbox.find('xmin').text) * ratio_w
-                ymin = float(bbox.find('ymin').text) * ratio_h
-                xmax = float(bbox.find('xmax').text) * ratio_w
-                ymax = float(bbox.find('ymax').text) * ratio_h
+                xmin = float(bbox.find('xmin').text) / w_img
+                ymin = float(bbox.find('ymin').text) / h_img
+                xmax = float(bbox.find('xmax').text) / w_img
+                ymax = float(bbox.find('ymax').text) / h_img
 
                 class_ = self.class_dict[name]
                 if self.is_categorical:
                     class_ = self.to_categorical(class_, self.num_classes)
                     class_ = torch.as_tensor(class_)
-                bbox = [ymin, xmin, ymax, xmax]
+
+                bbox = torch.as_tensor([ymin, xmin, ymax, xmax])
 
                 classes.append(class_)
                 bboxes.append(bbox)
